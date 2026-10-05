@@ -123,16 +123,13 @@ export class UIManager {
       form.addEventListener('submit', (e) => {
         e.preventDefault();
         sound.playClick('switch');
-        confetti({
-          particleCount: 100,
-          spread: 80,
-          origin: { y: 0.5 }
-        });
-        this.showToast('Thank you! Your message has been received.');
-        form.reset();
-        setTimeout(() => {
-          this.closeAllModals();
-        }, 1500);
+        const name = document.getElementById('contact-name').value.trim();
+        const email = document.getElementById('contact-email').value.trim();
+        const message = document.getElementById('contact-msg').value.trim();
+        const subject = encodeURIComponent(`Portfolio enquiry from ${name}`);
+        const body = encodeURIComponent(`${message}\n\nFrom: ${name}\nReply to: ${email}`);
+        window.location.href = `mailto:ramees.kallan@outlook.com?subject=${subject}&body=${body}`;
+        this.showToast('Email draft opened. Send it from your email app.');
       });
     }
 

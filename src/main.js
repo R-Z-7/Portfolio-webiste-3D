@@ -76,7 +76,7 @@ window.addEventListener('DOMContentLoaded', () => {
         if (loaderOverlay) {
           loaderOverlay.classList.add('hidden');
         }
-        handleHash();
+
       }, 120);
     }
   };
