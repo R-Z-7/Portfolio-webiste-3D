@@ -1271,3 +1271,35 @@ html, body {
 }
 
 .music-credit { color: #94a3b8; font-size: 10px; align-self: center; text-underline-offset: 3px; }
+
+:root { color-scheme: dark; }
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg-deep: #e8e4db; --bg-dark: #e8e4db;
+  --bg-card: rgba(249, 248, 244, 0.97); --bg-card-hover: #ffffff;
+  --bg-glass: rgba(249, 248, 244, 0.88); --border-glass: rgba(25, 45, 60, 0.18);
+  --text-primary: #172b3a; --text-secondary: #41586b; --text-muted: #52697b;
+  --accent-cyan: #006d94; --shadow-ambient: 0 20px 50px rgba(40, 50, 60, 0.15);
+}
+.theme-control { pointer-events: auto; display: flex; flex-direction: column; gap: 4px; padding: 10px 14px; border: 1px solid var(--border-glass); border-radius: 12px; background: var(--bg-glass); font-size: 11px; }
+.theme-control select { padding: 8px; min-height: 40px; border: 1px solid var(--border-glass); border-radius: 6px; background: var(--bg-deep); color: var(--text-primary); font: inherit; }
+#theme-status { color: var(--text-secondary); text-transform: capitalize; }
+.hud-right { align-items: flex-start; }
+[data-theme="light"] .hero-tagline-title, [data-theme="light"] .hero-role, [data-theme="light"] .nav-link-btn, [data-theme="light"] .hero-action, [data-theme="light"] .projects-title, [data-theme="light"] .project-card-title, [data-theme="light"] .timeline-role { color: #172b3a; text-shadow: none; }
+[data-theme="light"] .hero-tagline-subtitle, [data-theme="light"] .music-credit, [data-theme="light"] .hud-copyright, [data-theme="light"] .project-card-desc, [data-theme="light"] .timeline-company, [data-theme="light"] .timeline-bullets, [data-theme="light"] .contact-form-note { color: #41586b; }
+[data-theme="light"] .hero-action-primary { background: #17394a; color: #ffffff; }
+[data-theme="light"] .status-pill { color: #075d42; background: rgba(209, 250, 229, 0.9); }
+[data-theme="light"] .studio-hints { background: var(--bg-glass); }
+[data-theme="light"] .modal-overlay { background: rgba(216, 222, 224, 0.85); }
+[data-theme="light"] .form-input, [data-theme="light"] .form-textarea { background: #ffffff; color: #172b3a; }
+[data-theme="light"] .projects-modal-container [style*="color:"], [data-theme="light"] .project-footer-links span, [data-theme="light"] .modal-path, [data-theme="light"] .filter-pill { color: #41586b !important; }
+[data-theme="light"] .projects-modal-container [style*="background:"] { background: rgba(224, 232, 234, 0.65) !important; }
+[data-theme="light"] .project-diagram-box, [data-theme="light"] .tech-tag, [data-theme="light"] .timeline-period { background: #e4ecef; color: #24465a; }
+[data-theme="light"] #loader-overlay { background: #e8e4db; }
+[data-theme="light"] .loader-title { color: #172b3a; }
+@media (max-width: 600px) {
+  .hud-right { flex-direction: column; gap: 8px; }
+  .theme-control { flex-direction: row; align-items: center; width: 100%; padding: 6px 10px; gap: 10px; }
+  .theme-control select { min-height: 36px; }
+  #theme-status { margin-left: auto; font-size: 10px; }
+}

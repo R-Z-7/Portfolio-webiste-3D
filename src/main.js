@@ -50,6 +50,26 @@ window.addEventListener('DOMContentLoaded', () => {
     studioScene.repairNetwork();
   });
 
+  const themeSelect = document.getElementById('theme-select');
+  const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
+  let themePreference = 'system';
+  try { themePreference = localStorage.getItem('portfolio-theme') || 'system'; } catch {}
+  if (!['system', 'light', 'dark'].includes(themePreference)) themePreference = 'system';
+  themeSelect.value = themePreference;
+  function applyTheme() {
+    const resolved = themePreference === 'system' ? (systemTheme.matches ? 'dark' : 'light') : themePreference;
+    document.documentElement.dataset.theme = resolved;
+    studioScene.setTheme(resolved);
+    document.getElementById('theme-status').textContent = themePreference === 'system' ? `System: ${resolved}` : `${resolved} theme`;
+  }
+  themeSelect.addEventListener('change', () => {
+    themePreference = themeSelect.value;
+    try { localStorage.setItem('portfolio-theme', themePreference); } catch {}
+    applyTheme();
+  });
+  systemTheme.addEventListener('change', applyTheme);
+  applyTheme();
+
   // Deep-linking hash & query param handler
   function handleInitialNav() {
     const params = new URLSearchParams(window.location.search);

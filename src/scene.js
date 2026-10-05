@@ -139,9 +139,25 @@ export class StudioScene {
     requestAnimationFrame(this.animate);
   }
 
+  setTheme(theme) {
+    const light = theme === 'light';
+    this.scene.background.setHex(light ? 0xe8e4db : 0x182435);
+    this.scene.fog.color.copy(this.scene.background);
+    this.scene.fog.density = light ? 0.025 : 0.045;
+    this.ambientLight.color.setHex(light ? 0xfff4df : 0x9bb5d5);
+    this.ambientLight.intensity = light ? 2.0 : 1.2;
+    this.keyLight.color.setHex(light ? 0xfff1d6 : 0xe1eeff);
+    this.keyLight.intensity = light ? 3.2 : 2.3;
+    this.rimLight.intensity = light ? 0.7 : 0.8;
+    this.renderer.toneMappingExposure = light ? 1.35 : 1.25;
+    this.floorMaterial.color.setHex(light ? 0xd9d2c5 : 0x26364b);
+    this.rugMaterial.color.setHex(light ? 0xb7c4c8 : 0x35475d);
+  }
+
   setupLighting() {
     // Ambient soft blue sky light
     const ambientLight = new THREE.AmbientLight(0x283b56, 0.85);
+    this.ambientLight = ambientLight;
     this.scene.add(ambientLight);
 
     // Directional Key Light (Moonlight / Studio Key)
@@ -158,11 +174,13 @@ export class StudioScene {
     keyLight.shadow.camera.bottom = -5;
     keyLight.shadow.bias = -0.0004;
     keyLight.shadow.radius = 2.5;
+    this.keyLight = keyLight;
     this.scene.add(keyLight);
 
     // Soft Cyan/Blue Rim Light from behind
     const rimLight = new THREE.DirectionalLight(0x38bdf8, 0.45);
     rimLight.position.set(5, 5, -5);
+    this.rimLight = rimLight;
     this.scene.add(rimLight);
     const rackLight = new THREE.PointLight(0x7dd3fc, 1.6, 3);
     rackLight.position.set(1.2, 2.3, 1.4);
@@ -198,6 +216,7 @@ export class StudioScene {
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = -0.02;
     floor.receiveShadow = true;
+    this.floorMaterial = floorMat;
     this.scene.add(floor);
 
     // Floating Platform / Desk Rug
@@ -210,6 +229,7 @@ export class StudioScene {
     const rug = new THREE.Mesh(rugGeo, rugMat);
     rug.position.set(0, 0.02, 0);
     rug.receiveShadow = true;
+    this.rugMaterial = rugMat;
     this.scene.add(rug);
 
     // Build Individual Components
