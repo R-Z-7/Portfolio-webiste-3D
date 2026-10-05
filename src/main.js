@@ -18,7 +18,9 @@ window.addEventListener('DOMContentLoaded', () => {
     // onObjectClick
     (objectId, objectTitle) => {
       sound.playClick('soft');
-      if (objectId === 'monitor') {
+      if (objectId === 'cv') {
+        window.open(document.getElementById('download-cv-btn').href, '_blank', 'noopener,noreferrer');
+      } else if (objectId === 'monitor') {
         uiManager.openSection('work');
       } else if (objectId === 'notebook') {
         uiManager.openSection('about');
@@ -41,6 +43,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Initialize UI Manager
   uiManager = new UIManager(studioScene);
+
+  document.getElementById('reset-view').addEventListener('click', () => uiManager.closeAllModals());
+  document.getElementById('network-demo').addEventListener('click', () => {
+    studioScene.navigateTo('rack');
+    studioScene.repairNetwork();
+  });
 
   // Deep-linking hash & query param handler
   function handleInitialNav() {

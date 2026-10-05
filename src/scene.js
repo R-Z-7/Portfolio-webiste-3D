@@ -16,6 +16,12 @@ export class StudioScene {
     this.hoveredObject = null;
     this.interactiveObjects = [];
 
+    this.mobile = window.matchMedia('(max-width: 768px)').matches;
+    this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.networkState = 'fault';
+    this.networkTime = 0;
+    this.repairStarted = null;
+    this.lastFrame = 0;
     // Lighting state
     this.lampLightOn = true;
 
@@ -55,8 +61,8 @@ export class StudioScene {
         target: new THREE.Vector3(0.75, 1.25, 0.6)
       },
       rack: {
-        pos: new THREE.Vector3(2.4, 2.1, 2.2),
-        target: new THREE.Vector3(1.6, 1.05, -0.2)
+        pos: new THREE.Vector3(2.2, 2.05, 2.7),
+        target: new THREE.Vector3(1.05, 1.5, 0.62)
       }
     };
 
@@ -67,7 +73,12 @@ export class StudioScene {
     this.targetStart = new THREE.Vector3();
     this.targetEnd = new THREE.Vector3();
     this.animProgress = 1;
-    this.animDuration = 1.2;
+    this.animDuration = this.reducedMotion ? 0.01 : 0.7;
+    if (this.mobile) {
+      this.cameraPositions.overview.pos.set(-2.5, 3.3, 4.1);
+      this.cameraPositions.overview.target.set(0.45, 1.95, 0.15);
+      this.cameraPositions.rack.target.y = 1.85;
+    }
     this.animClock = new THREE.Clock();
 
     // Mouse parallax
@@ -85,7 +96,7 @@ export class StudioScene {
 
     // 2. Camera
     const aspect = this.container.clientWidth / this.container.clientHeight;
-    this.camera = new THREE.PerspectiveCamera(40, aspect, 0.1, 50);
+    this.camera = new THREE.PerspectiveCamera(this.mobile ? 48 : 40, aspect, 0.1, 50);
     this.camera.position.copy(this.cameraPositions.overview.pos);
 
     // 3. Renderer
@@ -94,7 +105,7 @@ export class StudioScene {
       powerPreference: 'high-performance'
     });
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.mobile ? 1.25 : 2));
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -111,6 +122,8 @@ export class StudioScene {
     this.controls.minDistance = 2.0;
     this.controls.maxDistance = 8.5;
     this.controls.enablePan = false;
+    this.controls.addEventListener('start', () => { this.controlsDragging = true; });
+
 
     // 5. Lighting Setup
     this.setupLighting();
@@ -135,8 +148,8 @@ export class StudioScene {
     const keyLight = new THREE.DirectionalLight(0xdbeafe, 1.2);
     keyLight.position.set(-6, 9, 6);
     keyLight.castShadow = true;
-    keyLight.shadow.mapSize.width = 2048;
-    keyLight.shadow.mapSize.height = 2048;
+    keyLight.shadow.mapSize.width = this.mobile ? 512 : 2048;
+    keyLight.shadow.mapSize.height = this.mobile ? 512 : 2048;
     keyLight.shadow.camera.near = 0.5;
     keyLight.shadow.camera.far = 25;
     keyLight.shadow.camera.left = -5;
@@ -151,12 +164,15 @@ export class StudioScene {
     const rimLight = new THREE.DirectionalLight(0x38bdf8, 0.45);
     rimLight.position.set(5, 5, -5);
     this.scene.add(rimLight);
+    const rackLight = new THREE.PointLight(0x7dd3fc, 1.6, 3);
+    rackLight.position.set(1.2, 2.3, 1.4);
+    this.scene.add(rackLight);
 
     // Warm Desk Lamp Spot Light
     this.lampLight = new THREE.SpotLight(0xffe6a3, 3.2, 7.5, Math.PI / 3.2, 0.45, 1.2);
     this.lampLight.position.set(1.4, 2.8, -0.1);
     this.lampLight.target.position.set(0.4, 1.2, 0.1);
-    this.lampLight.castShadow = true;
+    this.lampLight.castShadow = !this.mobile;
     this.lampLight.shadow.mapSize.width = 1024;
     this.lampLight.shadow.mapSize.height = 1024;
     this.lampLight.shadow.bias = -0.0003;
@@ -205,8 +221,11 @@ export class StudioScene {
     this.buildPlant();
     this.buildCiscoSwitch();
     this.buildNotebookAndPencil();
-    this.buildCoffeeMug();
-    this.buildDustParticles();
+    this.buildCV();
+    if (!this.mobile) {
+      this.buildCoffeeMug();
+      this.buildDustParticles();
+    }
   }
 
   // 1. Architectural L-Shaped Desk
@@ -441,7 +460,7 @@ export class StudioScene {
     ctx.strokeRect(w - 220, 14, 195, 26);
     ctx.fillStyle = '#34d399';
     ctx.font = 'bold 12px "JetBrains Mono", monospace';
-    ctx.fillText('● SYSTEM OPERATIONAL', w - 205, 31);
+    ctx.fillText('● SIMULATED NETWORK', w - 205, 31);
 
     // Left Column: Telemetry & OSPF
     ctx.font = '14px "JetBrains Mono", monospace';
@@ -495,56 +514,81 @@ export class StudioScene {
     ctx.font = '11px "JetBrains Mono", monospace';
     ctx.fillText('AVG: 12.4ms   MIN: 9.1ms   LOSS: 0.00%', 45, 415);
 
-    // Right Column: Switch Port Matrix
-    ctx.fillStyle = '#38bdf8';
-    ctx.font = '14px "JetBrains Mono", monospace';
-    ctx.fillText('[CISCO MANAGED SWITCH PORTS (GIGABIT)]', 540, 95);
-
-    for (let r = 0; r < 2; r++) {
-      for (let c = 0; c < 8; c++) {
-        const portNum = r * 8 + c + 1;
-        const px = 540 + c * 54;
-        const py = 120 + r * 65;
-        const isActive = portNum !== 6 && portNum !== 13;
-
-        ctx.fillStyle = isActive ? 'rgba(16, 185, 129, 0.15)' : 'rgba(100, 116, 139, 0.15)';
-        ctx.fillRect(px, py, 46, 50);
-        ctx.strokeStyle = isActive ? '#10b981' : '#475569';
-        ctx.strokeRect(px, py, 46, 50);
-
-        ctx.fillStyle = isActive ? '#34d399' : '#64748b';
-        ctx.font = '10px "JetBrains Mono", monospace';
-        ctx.fillText(`P${portNum}`, px + 8, py + 20);
-
-        ctx.beginPath();
-        ctx.arc(px + 35, py + 16, 3.5, 0, Math.PI * 2);
-        ctx.fillStyle = isActive ? '#10b981' : '#475569';
-        ctx.fill();
-
-        ctx.font = '9px "JetBrains Mono", monospace';
-        ctx.fillStyle = '#94a3b8';
-        ctx.fillText(isActive ? '1G' : 'DWN', px + 8, py + 38);
-      }
-    }
-
-    // Call to Action Banner on Screen
-    ctx.fillStyle = 'rgba(56, 189, 248, 0.12)';
-    ctx.fillRect(540, 270, 440, 80);
-    ctx.strokeStyle = '#38bdf8';
-    ctx.strokeRect(540, 270, 440, 80);
-
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 15px "JetBrains Mono", monospace';
-    ctx.fillText('FEATURED: ENTERPRISE NETWORK REFRESH', 560, 302);
-    ctx.fillStyle = '#38bdf8';
-    ctx.font = '12px "JetBrains Mono", monospace';
-    ctx.fillText('➔ CLICK MONITOR TO EXPLORE WORK & LABS', 560, 330);
+    this.drawTopology(ctx);
 
     // Live Clock & Footer
     ctx.fillStyle = '#475569';
     ctx.font = '11px "JetBrains Mono", monospace';
     const nowStr = new Date().toUTCString();
-    ctx.fillText(`LEEDS_UK // ${nowStr} // READY`, 40, 560);
+    ctx.fillText(`DEMO TELEMETRY // ${nowStr}`, 40, 560);
+  }
+
+  drawTopology(ctx) {
+    const nodes = [[580, 155, 'ROUTER'], [760, 155, 'SWITCH'], [925, 155, 'SERVER'], [700, 325, 'DESK 01'], [875, 325, 'DESK 02']];
+    const links = [[0, 1], [1, 2], [1, 3], [1, 4]];
+    ctx.font = 'bold 15px monospace';
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillText('LAB // PACKET FLOW', 540, 95);
+    links.forEach(([from, to], i) => {
+      const a = nodes[from], b = nodes[to];
+      const faulty = i === 1 && this.networkState !== 'healthy';
+      ctx.strokeStyle = faulty ? '#fbbf24' : '#38bdf8';
+      ctx.lineWidth = 3;
+      ctx.setLineDash(faulty ? [8, 8] : []);
+      ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+      ctx.setLineDash([]);
+      if (!faulty) {
+        const t = this.reducedMotion ? 0.5 : (this.networkTime * 0.4 + i * 0.2) % 1;
+        ctx.fillStyle = '#e0f2fe';
+        ctx.beginPath(); ctx.arc(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, 5, 0, Math.PI * 2); ctx.fill();
+      }
+    });
+    nodes.forEach(([x, y, label], i) => {
+      ctx.fillStyle = i === 2 && this.networkState !== 'healthy' ? '#78350f' : '#0c4a6e';
+      ctx.fillRect(x - 42, y - 22, 84, 44);
+      ctx.strokeStyle = '#7dd3fc'; ctx.strokeRect(x - 42, y - 22, 84, 44);
+      ctx.fillStyle = '#ffffff'; ctx.font = '12px monospace'; ctx.fillText(label, x - 33, y + 4);
+    });
+    ctx.fillStyle = this.networkState === 'healthy' ? '#34d399' : '#fbbf24';
+    ctx.font = 'bold 14px monospace';
+    const label = this.networkState === 'healthy' ? 'LINK RESTORED // ALL NODES REACHABLE' : this.networkState === 'repairing' ? 'CHECKING PATCH LEAD / PORT / PING...' : 'SERVER UPLINK DOWN // CLICK AMBER CABLE';
+    ctx.fillText(label, 540, 420);
+    ctx.fillStyle = '#94a3b8'; ctx.font = '12px monospace';
+    ctx.fillText('CLICK DISPLAY TO EXPLORE NETWORK PROJECTS', 540, 460);
+  }
+
+  repairNetwork() {
+    if (this.networkState === 'repairing') return;
+    if (this.networkState === 'healthy') {
+      this.networkState = 'fault';
+      this.faultCable.material.color.setHex(0xfbbf24);
+      this.onHoverChange?.({ title: 'Simulated link failure', hint: 'Select the amber uplink to inspect and restore it.' });
+    } else {
+      this.networkState = 'repairing';
+      this.repairStarted = this.networkTime;
+      this.onHoverChange?.({ title: 'Checking the uplink', hint: 'Reseating patch lead → verifying port → testing reachability.' });
+    }
+  }
+
+  labelTexture(text, subtitle = '') {
+    const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#e9eef0'; ctx.fillRect(0, 0, 512, 256);
+    ctx.fillStyle = '#0e1522'; ctx.font = 'bold 36px monospace'; ctx.fillText(text, 24, 90);
+    ctx.font = '22px monospace'; ctx.fillText(subtitle, 24, 145);
+    ctx.fillStyle = '#0284c7'; ctx.fillRect(24, 190, 464, 8);
+    const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace;
+    return texture;
+  }
+
+  buildCV() {
+    const paper = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.006, 0.43), new THREE.MeshStandardMaterial({ color: 0xe9eef0, roughness: 0.9 }));
+    paper.position.set(-0.65, 1.30, 0.42); paper.rotation.y = -0.15;
+    const label = new THREE.Mesh(new THREE.PlaneGeometry(0.30, 0.41), new THREE.MeshBasicMaterial({ map: this.labelTexture('RAMEES / CV', 'VIEW PROFILE ↗') }));
+    label.rotation.x = -Math.PI / 2; label.position.y = 0.004; paper.add(label);
+    paper.castShadow = true; this.scene.add(paper);
+    this.registerInteractive(paper, 'cv', 'View / Download CV', 'Open Ramees’s CV in a new tab');
+    this.registerInteractive(label, 'cv', 'View / Download CV', 'Open Ramees’s CV in a new tab');
   }
 
   // 3. Retro Audiophile Vinyl Turntable
@@ -921,8 +965,32 @@ export class StudioScene {
       });
     }
 
+    this.registerInteractive(faceplate, 'rack', 'Network rack', 'Explore infrastructure experience');
     this.registerInteractive(chassis, 'rack', 'Cisco Managed Switch', 'Click to view Experience, Certifications & Hardware');
 
+    // Compact open rack with an upper router and a labelled patch panel.
+    for (const x of [-0.27, 0.27]) {
+      const rail = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.45, 0.31), metalCaseMat);
+      rail.position.set(x, 0.20, 0); rackGroup.add(rail);
+    }
+    for (const [y, name] of [[0.19, 'CORE ROUTER'], [0.36, 'PATCH / VLAN 10']]) {
+      const device = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.085, 0.28), metalCaseMat);
+      device.position.y = y; device.castShadow = true; rackGroup.add(device);
+      this.registerInteractive(device, 'rack', 'Network infrastructure', 'Explore infrastructure experience');
+      const label = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.065), new THREE.MeshBasicMaterial({ map: this.labelTexture(name, 'LEEDS / LAB') }));
+      label.position.set(0, y, 0.145); rackGroup.add(label);
+      this.registerInteractive(label, 'rack', 'Network infrastructure', 'Explore infrastructure experience');
+    }
+    for (let i = 0; i < 4; i++) {
+      const x = -0.18 + i * 0.09;
+      const curve = new THREE.CatmullRomCurve3([new THREE.Vector3(x, 0.36, 0.15), new THREE.Vector3(x, 0.24, 0.29 + i * 0.025), new THREE.Vector3(x + 0.02, 0.08, 0.24), new THREE.Vector3(x, 0.028, 0.15)]);
+      const cable = new THREE.Mesh(new THREE.TubeGeometry(curve, this.mobile ? 12 : 24, i === 1 ? 0.014 : 0.009, 6, false), new THREE.MeshStandardMaterial({ color: i === 1 ? 0xfbbf24 : 0x38bdf8, roughness: 0.65 }));
+      rackGroup.add(cable);
+      if (i === 1) {
+        this.faultCable = cable;
+        this.registerInteractive(cable, 'fault', 'Amber uplink / troubleshooting demo', 'Inspect the failed link and restore connectivity');
+      }
+    }
     this.scene.add(rackGroup);
   }
 
@@ -1077,6 +1145,9 @@ export class StudioScene {
   registerInteractive(mesh, id, title, hint) {
     mesh.userData = { id, title, hint };
     this.interactiveObjects.push(mesh);
+    const edges = new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry), new THREE.LineBasicMaterial({ color: 0x7dd3fc, transparent: true, opacity: 0.8, depthTest: false }));
+    edges.visible = false; edges.renderOrder = 10; mesh.add(edges);
+    mesh.userData.highlight = edges;
   }
 
   setupEvents() {
@@ -1092,7 +1163,11 @@ export class StudioScene {
       this.checkRaycast();
     };
 
+    let pointerStart = null;
+    this.container.addEventListener('pointerdown', e => { pointerStart = { x: e.clientX, y: e.clientY }; });
     const onClick = (e) => {
+      if (!pointerStart || Math.hypot(e.clientX - pointerStart.x, e.clientY - pointerStart.y) > 8) return;
+      onPointerMove(e);
       if (this.hoveredObject) {
         const { id, title } = this.hoveredObject.userData;
         this.handleObjectInteraction(id, title);
@@ -1106,7 +1181,7 @@ export class StudioScene {
       this.camera.aspect = w / h;
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(w, h);
-      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.mobile ? 1.25 : 2));
     };
 
     this.container.addEventListener('pointermove', onPointerMove);
@@ -1116,12 +1191,14 @@ export class StudioScene {
 
   checkRaycast() {
     this.raycaster.setFromCamera(this.mouse, this.camera);
-    const intersects = this.raycaster.intersectObjects(this.interactiveObjects);
+    const intersects = this.raycaster.intersectObjects(this.interactiveObjects, false);
 
     if (intersects.length > 0) {
       const hit = intersects[0].object;
       if (this.hoveredObject !== hit) {
+        if (this.hoveredObject) this.hoveredObject.userData.highlight.visible = false;
         this.hoveredObject = hit;
+        hit.userData.highlight.visible = true;
         this.container.style.cursor = 'pointer';
         if (this.onHoverChange) {
           this.onHoverChange(hit.userData);
@@ -1129,6 +1206,7 @@ export class StudioScene {
       }
     } else {
       if (this.hoveredObject !== null) {
+        this.hoveredObject.userData.highlight.visible = false;
         this.hoveredObject = null;
         this.container.style.cursor = 'default';
         if (this.onHoverChange) {
@@ -1139,7 +1217,9 @@ export class StudioScene {
   }
 
   handleObjectInteraction(id, title) {
-    if (id === 'lamp') {
+    if (id === 'fault') {
+      this.repairNetwork();
+    } else if (id === 'lamp') {
       this.toggleLamp();
     } else if (id === 'turntable') {
       this.toggleTurntable();
@@ -1182,6 +1262,7 @@ export class StudioScene {
   // Camera Navigation Choreography
   navigateTo(viewName) {
     if (!this.cameraPositions[viewName]) return;
+    this.controlsDragging = false;
     this.currentView = viewName;
     const targetConfig = this.cameraPositions[viewName];
 
@@ -1201,11 +1282,19 @@ export class StudioScene {
   }
 
   // Main Render Loop
-  animate() {
+  animate(timestamp = 0) {
     requestAnimationFrame(this.animate);
+    if (document.hidden || ((this.mobile || this.reducedMotion) && timestamp - this.lastFrame < 33)) return;
+    this.lastFrame = timestamp;
 
     const delta = this.animClock.getDelta();
     const elapsedTime = this.animClock.getElapsedTime();
+    this.networkTime += Math.min(delta, 0.1);
+    if (this.networkState === 'repairing' && this.networkTime - this.repairStarted > 2.5) {
+      this.networkState = 'healthy';
+      this.faultCable.material.color.setHex(0x10b981);
+      this.onHoverChange?.({ title: 'Connectivity restored', hint: 'Patch lead reseated, port verified, ping successful. Select again to replay.' });
+    }
 
     // 1. Smooth Camera Transition
     if (this.cameraAnimating) {
@@ -1224,7 +1313,7 @@ export class StudioScene {
       this.controls.update();
     } else {
       // Apply subtle mouse parallax when idle in overview
-      if (this.currentView === 'overview') {
+      if (this.currentView === 'overview' && !this.reducedMotion && !this.controlsDragging) {
         this.currentParallax.x += (this.targetParallax.x - this.currentParallax.x) * 0.05;
         this.currentParallax.y += (this.targetParallax.y - this.currentParallax.y) * 0.05;
         this.camera.position.x = this.cameraPositions.overview.pos.x + this.currentParallax.x;
@@ -1234,7 +1323,7 @@ export class StudioScene {
     }
 
     // 2. Vinyl Turntable Spin
-    if (this.turntableSpinning && this.vinylRecord) {
+    if (this.turntableSpinning && this.vinylRecord && !this.reducedMotion) {
       this.vinylRecord.rotation.y += 0.045;
     }
 
@@ -1244,7 +1333,7 @@ export class StudioScene {
     }
 
     // 4. Rising Steam Particles
-    this.steamParticles.forEach(p => {
+    if (!this.reducedMotion) this.steamParticles.forEach(p => {
       p.mesh.position.y += p.speed;
       p.mesh.scale.multiplyScalar(1.008);
       if (p.mesh.position.y > p.maxY) {
@@ -1268,8 +1357,8 @@ export class StudioScene {
     });
 
     // 6. Monitor Telemetry Updates (Every 2 seconds)
-    if (Math.floor(elapsedTime * 2) !== this.lastTelemetryTick) {
-      this.lastTelemetryTick = Math.floor(elapsedTime * 2);
+    if (Math.floor(this.networkTime * (this.reducedMotion ? 1 : 12)) !== this.lastTelemetryTick) {
+      this.lastTelemetryTick = Math.floor(this.networkTime * (this.reducedMotion ? 1 : 12));
       this.monitorGraphPoints.shift();
       const last = this.monitorGraphPoints[this.monitorGraphPoints.length - 1];
       const next = Math.max(10, Math.min(80, last + (Math.random() - 0.5) * 18));
@@ -1279,7 +1368,7 @@ export class StudioScene {
     }
 
     // 7. Dust Motes Subtle Drift
-    if (this.dustParticles) {
+    if (this.dustParticles && !this.reducedMotion) {
       this.dustParticles.rotation.y = elapsedTime * 0.015;
     }
 

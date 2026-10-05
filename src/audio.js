@@ -1,6 +1,11 @@
 // Web Audio API Procedural Ambient Sound Engine & Vinyl Simulator
 class SoundEngine {
   constructor() {
+    this.track = new Audio(`${import.meta.env.BASE_URL}audio/breeze.mp3`);
+    this.track.loop = true;
+    this.track.preload = 'none';
+    this.track.volume = 0.28;
+    this.track.addEventListener('error', () => { this.isPlaying = false; this.notify(); });
     this.ctx = null;
     this.isPlaying = false;
     this.isMuted = true;
@@ -67,6 +72,9 @@ class SoundEngine {
   startVinylLoop() {
     if (!this.ctx || !this.vinylBuffer) return;
     
+    if (this.vinylSource) {
+      try { this.vinylSource.stop(); } catch {}
+    }
     this.vinylSource = this.ctx.createBufferSource();
     this.vinylSource.buffer = this.vinylBuffer;
     this.vinylSource.loop = true;
@@ -93,11 +101,10 @@ class SoundEngine {
       try {
         this.vinylGain.gain.setValueAtTime(this.vinylGain.gain.value, this.ctx.currentTime);
         this.vinylGain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.8);
+        const source = this.vinylSource;
+        this.vinylSource = null;
         setTimeout(() => {
-          if (this.vinylSource) {
-            try { this.vinylSource.stop(); } catch(e){}
-            this.vinylSource = null;
-          }
+          try { source?.stop(); } catch {}
         }, 850);
       } catch(e) {}
     }
@@ -144,44 +151,24 @@ class SoundEngine {
   }
 
   async toggle() {
-    this.init();
-    if (!this.ctx) return false;
-
-    if (this.ctx.state === 'suspended') {
-      await this.ctx.resume();
-    }
-
-    this.isPlaying = !this.isPlaying;
-
     if (this.isPlaying) {
-      // Fade in master
-      this.gainNode.gain.cancelScheduledValues(this.ctx.currentTime);
-      this.gainNode.gain.setValueAtTime(0.0001, this.ctx.currentTime);
-      this.gainNode.gain.exponentialRampToValueAtTime(0.7, this.ctx.currentTime + 1.2);
-
-      this.startVinylLoop();
-      this.currentChordIndex = 0;
-      this.playChord(this.chords[this.currentChordIndex]);
+      this.track.pause();
+      this.isPlaying = false;
     } else {
-      // Fade out
-      this.gainNode.gain.cancelScheduledValues(this.ctx.currentTime);
-      this.gainNode.gain.setValueAtTime(this.gainNode.gain.value, this.ctx.currentTime);
-      this.gainNode.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.8);
-
-      this.stopVinylLoop();
-      if (this.chordTimer) clearTimeout(this.chordTimer);
+      try {
+        await this.track.play();
+        this.isPlaying = true;
+      } catch {
+        this.isPlaying = false;
+      }
     }
-
     this.notify();
     return this.isPlaying;
   }
 
   // Micro haptic interaction sound
   playClick(type = 'soft') {
-    if (!this.ctx) {
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (AudioContextClass) this.ctx = new AudioContextClass();
-    }
+    this.init();
     if (!this.ctx || this.ctx.state === 'suspended') return;
 
     try {

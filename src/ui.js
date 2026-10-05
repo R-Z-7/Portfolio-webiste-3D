@@ -150,6 +150,8 @@ export class UIManager {
 
   updateAudioState(isPlaying) {
     if (!this.audioBtn) return;
+    this.audioBtn.setAttribute('aria-pressed', String(isPlaying));
+    this.scene.toggleTurntable(isPlaying);
     if (isPlaying) {
       this.audioBtn.classList.add('playing');
       this.audioBtn.title = 'Ambient Lo-Fi Audio (Playing)';

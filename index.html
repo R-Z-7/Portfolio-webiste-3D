@@ -49,7 +49,7 @@
       <div class="hud-top-bar">
         <!-- Left: Audio Toggle & Tagline -->
         <div class="hud-left">
-          <button id="audio-toggle" class="audio-toggle-btn" aria-label="Toggle ambient studio audio" title="Toggle Lo-Fi Ambient Audio">
+          <button id="audio-toggle" class="audio-toggle-btn" aria-label="Play or pause Breeze background music" aria-pressed="false" title="Toggle Lo-Fi Ambient Audio">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
               <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
@@ -105,8 +105,13 @@
 
       <!-- Bottom Bar -->
       <footer class="hud-bottom-bar">
+        <div class="scene-controls">
+          <a class="music-credit" href="https://music.imanandhu.in/" target="_blank" rel="noopener noreferrer">Music: Breeze · Anandhu Remanan ↗</a>
+          <button id="reset-view" class="hero-action">Reset view ↺</button>
+          <button id="network-demo" class="hero-action">Troubleshoot uplink</button>
+        </div>
         <div class="studio-hints">
-          <span id="hover-tooltip" class="hover-item-tooltip">
+          <span id="hover-tooltip" class="hover-item-tooltip" role="status" aria-live="polite">
             <span>✦</span> Drag to orbit • Click objects in studio to explore
           </span>
         </div>
