@@ -175,6 +175,9 @@ export class UIManager {
 
   openSection(sectionId) {
     this.closeAllModals(false);
+    try {
+      history.replaceState(null, '', '#' + sectionId);
+    } catch(e) {}
 
     if (sectionId === 'about') {
       this.scene.navigateTo('notebook');
@@ -198,6 +201,11 @@ export class UIManager {
   closeAllModals(resetCamera = true) {
     document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
     this.activeModal = null;
+    try {
+      if (window.location.hash) {
+        history.replaceState(null, '', window.location.pathname);
+      }
+    } catch(e) {}
     if (resetCamera) {
       this.scene.resetToOverview();
     }

@@ -12,28 +12,6 @@ window.addEventListener('DOMContentLoaded', () => {
   let uiManager = null;
   let studioScene = null;
 
-  // Simulate smooth progressive load ("Setting the scene...")
-  let progress = 0;
-  const progressInterval = setInterval(() => {
-    progress += Math.floor(Math.random() * 18) + 10;
-    if (progress >= 100) {
-      progress = 100;
-      clearInterval(progressInterval);
-
-      if (loaderBarFill) loaderBarFill.style.width = '100%';
-      if (loaderPercent) loaderPercent.textContent = '100%';
-
-      setTimeout(() => {
-        if (loaderOverlay) {
-          loaderOverlay.classList.add('hidden');
-        }
-      }, 400);
-    } else {
-      if (loaderBarFill) loaderBarFill.style.width = `${progress}%`;
-      if (loaderPercent) loaderPercent.textContent = `${progress}%`;
-    }
-  }, 90);
-
   // Initialize 3D Scene
   studioScene = new StudioScene(
     container,
@@ -63,4 +41,44 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Initialize UI Manager
   uiManager = new UIManager(studioScene);
+
+  // Deep-linking hash & query param handler
+  function handleInitialNav() {
+    const params = new URLSearchParams(window.location.search);
+    const openParam = params.get('open');
+    const hash = window.location.hash.replace('#', '').trim();
+    const target = openParam || hash;
+    if (['about', 'work', 'experience', 'contact'].includes(target) && uiManager) {
+      if (loaderOverlay) loaderOverlay.classList.add('hidden');
+      uiManager.openSection(target);
+    }
+  }
+
+  handleInitialNav();
+  window.addEventListener('hashchange', () => {
+    const hash = window.location.hash.replace('#', '').trim();
+    if (['about', 'work', 'experience', 'contact'].includes(hash) && uiManager) {
+      uiManager.openSection(hash);
+    }
+  });
+
+  // Smooth progressive loader ("Setting the scene...")
+  let progress = 0;
+  const updateProgress = () => {
+    progress = Math.min(100, progress + 25);
+    if (loaderBarFill) loaderBarFill.style.width = `${progress}%`;
+    if (loaderPercent) loaderPercent.textContent = `${progress}%`;
+
+    if (progress < 100) {
+      setTimeout(updateProgress, 50);
+    } else {
+      setTimeout(() => {
+        if (loaderOverlay) {
+          loaderOverlay.classList.add('hidden');
+        }
+        handleHash();
+      }, 120);
+    }
+  };
+  updateProgress();
 });
