@@ -50,7 +50,7 @@ export class StudioScene {
     this.cameraPositions = {
       overview: {
         pos: new THREE.Vector3(-3.2, 3.4, 4.4),
-        target: new THREE.Vector3(-0.1, 0.7, 0)
+        target: new THREE.Vector3(-0.1, 1.05, 0)
       },
       monitor: {
         pos: new THREE.Vector3(-0.1, 2.05, 1.7),
@@ -74,11 +74,6 @@ export class StudioScene {
     this.targetEnd = new THREE.Vector3();
     this.animProgress = 1;
     this.animDuration = this.reducedMotion ? 0.01 : 0.7;
-    if (this.mobile) {
-      this.cameraPositions.overview.pos.set(-2.5, 3.3, 4.1);
-      this.cameraPositions.overview.target.set(0.45, 1.95, 0.15);
-      this.cameraPositions.rack.target.y = 1.85;
-    }
     this.animClock = new THREE.Clock();
 
     // Mouse parallax
@@ -96,7 +91,7 @@ export class StudioScene {
 
     // 2. Camera
     const aspect = this.container.clientWidth / this.container.clientHeight;
-    this.camera = new THREE.PerspectiveCamera(this.mobile ? 48 : 40, aspect, 0.1, 50);
+    this.camera = new THREE.PerspectiveCamera(40, aspect, 0.1, 50);
     this.camera.position.copy(this.cameraPositions.overview.pos);
 
     // 3. Renderer
@@ -188,7 +183,7 @@ export class StudioScene {
 
     // Warm Desk Lamp Spot Light
     this.lampLight = new THREE.SpotLight(0xffe6a3, 3.2, 7.5, Math.PI / 3.2, 0.45, 1.2);
-    this.lampLight.position.set(1.4, 2.8, -0.1);
+    this.lampLight.position.set(0.4, 2.42, -0.1);
     this.lampLight.target.position.set(0.4, 1.2, 0.1);
     this.lampLight.castShadow = !this.mobile;
     this.lampLight.shadow.mapSize.width = 1024;
@@ -200,7 +195,7 @@ export class StudioScene {
 
     // Subtle warm point light under the lamp bulb for ambient glow
     this.lampBulbGlow = new THREE.PointLight(0xffe6a3, 1.0, 2.0);
-    this.lampBulbGlow.position.set(1.4, 2.7, -0.1);
+    this.lampBulbGlow.position.set(0.4, 2.40, -0.1);
     this.scene.add(this.lampBulbGlow);
   }
 
@@ -242,8 +237,8 @@ export class StudioScene {
     this.buildCiscoSwitch();
     this.buildNotebookAndPencil();
     this.buildCV();
+    this.buildCoffeeMug();
     if (!this.mobile) {
-      this.buildCoffeeMug();
       this.buildDustParticles();
     }
   }
@@ -741,25 +736,21 @@ export class StudioScene {
     stem.castShadow = true;
     lampGroup.add(stem);
 
-    // Angled Arc Arm extending over desk
-    const armGeo = new THREE.CylinderGeometry(0.014, 0.014, 1.5, 16);
-    const arm = new THREE.Mesh(armGeo, blackMetal);
-    arm.position.set(-0.4, 2.3, 0.1);
-    arm.rotation.z = Math.PI / 3.2;
+    // A continuous curved tube joins the vertical stem directly to the shade.
+    const arc = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, 1.82, 0),
+      new THREE.Vector3(-0.12, 2.12, 0),
+      new THREE.Vector3(-0.5, 2.4, 0),
+      new THREE.Vector3(-1.0, 2.45, 0)
+    ]);
+    const arm = new THREE.Mesh(new THREE.TubeGeometry(arc, 32, 0.018, 10, false), blackMetal);
     arm.castShadow = true;
     lampGroup.add(arm);
-
-    // Counterweight Sphere at opposite end
-    const weightGeo = new THREE.SphereGeometry(0.06, 24, 24);
-    const weight = new THREE.Mesh(weightGeo, blackMetal);
-    weight.position.set(0.35, 1.85, 0.1);
-    weight.castShadow = true;
-    lampGroup.add(weight);
 
     // Thin Circular Lamp Disc Shade
     const shadeGeo = new THREE.CylinderGeometry(0.24, 0.24, 0.03, 32);
     const shade = new THREE.Mesh(shadeGeo, blackMetal);
-    shade.position.set(-1.0, 2.75, 0.1);
+    shade.position.set(-1.0, 2.45, 0);
     shade.castShadow = true;
     lampGroup.add(shade);
 
@@ -767,7 +758,7 @@ export class StudioScene {
     const diffuserGeo = new THREE.CylinderGeometry(0.22, 0.22, 0.005, 32);
     this.diffuserMat = new THREE.MeshBasicMaterial({ color: 0xffe6a3 });
     const diffuser = new THREE.Mesh(diffuserGeo, this.diffuserMat);
-    diffuser.position.set(-1.0, 2.73, 0.1);
+    diffuser.position.set(-1.0, 2.432, 0);
     lampGroup.add(diffuser);
 
     // Register click interaction
@@ -1078,7 +1069,7 @@ export class StudioScene {
   buildCoffeeMug() {
     const mugGroup = new THREE.Group();
     mugGroup.name = 'mug';
-    mugGroup.position.set(0.32, 1.29, -0.28);
+    mugGroup.position.set(0.15, 1.29, 0.52);
 
     const mugMat = new THREE.MeshStandardMaterial({
       color: 0xf1f5f9,
@@ -1087,9 +1078,13 @@ export class StudioScene {
     });
 
     // Cup Cylinder
-    const cupGeo = new THREE.CylinderGeometry(0.065, 0.055, 0.12, 24);
+    const cupGeo = new THREE.LatheGeometry([
+      new THREE.Vector2(0, 0), new THREE.Vector2(0.055, 0),
+      new THREE.Vector2(0.065, 0.14), new THREE.Vector2(0.055, 0.14),
+      new THREE.Vector2(0.047, 0.02), new THREE.Vector2(0, 0.02)
+    ], 24);
     const cup = new THREE.Mesh(cupGeo, mugMat);
-    cup.position.y = 0.06;
+    cup.position.y = 0;
     cup.castShadow = true;
     mugGroup.add(cup);
 
@@ -1097,7 +1092,7 @@ export class StudioScene {
     const coffeeGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.01, 24);
     const coffeeMat = new THREE.MeshStandardMaterial({ color: 0x271911, roughness: 0.3 });
     const coffee = new THREE.Mesh(coffeeGeo, coffeeMat);
-    coffee.position.y = 0.11;
+    coffee.position.y = 0.12;
     mugGroup.add(coffee);
 
     // Mug Handle
@@ -1114,7 +1109,7 @@ export class StudioScene {
       opacity: 0.15
     });
 
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < (this.mobile ? 0 : 8); i++) {
       const steamGeo = new THREE.SphereGeometry(0.015 + Math.random() * 0.015, 8, 8);
       const steam = new THREE.Mesh(steamGeo, steamMat);
       steam.position.set(
@@ -1207,14 +1202,21 @@ export class StudioScene {
     this.container.addEventListener('pointermove', onPointerMove);
     this.container.addEventListener('click', onClick);
     window.addEventListener('resize', onResize);
+    this.resizeObserver = new ResizeObserver(onResize);
+    this.resizeObserver.observe(this.container);
   }
 
   checkRaycast() {
     this.raycaster.setFromCamera(this.mouse, this.camera);
-    const intersects = this.raycaster.intersectObjects(this.interactiveObjects, false);
+    if (document.querySelector('.modal-overlay.active')) return;
+    const intersects = this.raycaster.intersectObjects(this.scene.children, true)
+      .filter(hit => hit.object.isMesh);
+    const first = intersects[0];
+    const interactive = first && this.interactiveObjects.includes(first.object);
+    const hits = interactive ? [first] : [];
 
-    if (intersects.length > 0) {
-      const hit = intersects[0].object;
+    if (hits.length > 0) {
+      const hit = hits[0].object;
       if (this.hoveredObject !== hit) {
         if (this.hoveredObject) this.hoveredObject.userData.highlight.visible = false;
         this.hoveredObject = hit;
@@ -1332,13 +1334,6 @@ export class StudioScene {
       this.controls.target.lerpVectors(this.targetStart, this.targetEnd, ease);
       this.controls.update();
     } else {
-      // Apply subtle mouse parallax when idle in overview
-      if (this.currentView === 'overview' && !this.reducedMotion && !this.controlsDragging) {
-        this.currentParallax.x += (this.targetParallax.x - this.currentParallax.x) * 0.05;
-        this.currentParallax.y += (this.targetParallax.y - this.currentParallax.y) * 0.05;
-        this.camera.position.x = this.cameraPositions.overview.pos.x + this.currentParallax.x;
-        this.camera.position.y = this.cameraPositions.overview.pos.y + this.currentParallax.y;
-      }
       this.controls.update();
     }
 

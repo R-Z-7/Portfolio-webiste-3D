@@ -137,6 +137,11 @@ export class UIManager {
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         this.closeAllModals();
+      } else if (e.key === 'Tab' && this.activeModal) {
+        const items = [...this.activeModal.querySelectorAll('button, a[href], input, textarea, select')].filter(el => !el.disabled && el.getClientRects().length);
+        const first = items[0], last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
       } else if (e.key === 'm' || e.key === 'M') {
         if (!e.target.matches('input, textarea')) {
           sound.toggle().then(isPlaying => {
@@ -173,7 +178,9 @@ export class UIManager {
   }
 
   openSection(sectionId) {
+    const opener = document.activeElement;
     this.closeAllModals(false);
+    this.modalOpener = opener;
     try {
       history.replaceState(null, '', '#' + sectionId);
     } catch(e) {}
@@ -195,11 +202,19 @@ export class UIManager {
       if (this.contactModal) this.contactModal.classList.add('active');
       this.activeModal = this.contactModal;
     }
+    if (this.activeModal) {
+      document.querySelector('.hud-layer').inert = true;
+      document.body.classList.add('modal-open');
+      this.activeModal.querySelector('.modal-close-btn')?.focus();
+    }
   }
 
   closeAllModals(resetCamera = true) {
     document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
     this.activeModal = null;
+    document.querySelector('.hud-layer').inert = false;
+    document.body.classList.remove('modal-open');
+    if (resetCamera) this.modalOpener?.focus();
     try {
       if (window.location.hash) {
         history.replaceState(null, '', window.location.pathname);
