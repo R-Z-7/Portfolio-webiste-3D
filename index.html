@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Primary Meta Tags -->
+    <title>Ramees Kallan — Network Support & Infrastructure Engineer | 3D Studio Portfolio</title>
+    <meta name="title" content="Ramees Kallan — Network Support & Infrastructure Engineer | 3D Studio Portfolio" />
+    <meta name="description" content="Interactive 3D digital studio portfolio of Ramees Kallan, Network Support & Infrastructure Engineer based in Leeds, UK. Cisco CCNA in progress, routers, managed switches, multi-site cutovers, and enterprise IT." />
+    <meta name="keywords" content="Ramees Kallan, Network Engineer, Infrastructure Support, Cisco CCNA, Leeds, Routers, Switches, ServiceNow, IT Support UK" />
+    <meta name="author" content="Ramees Kallan" />
+    <meta name="theme-color" content="#0e1522" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Ramees Kallan — 3D Studio Portfolio" />
+    <meta property="og:description" content="Interactive 3D digital studio portfolio of Ramees Kallan, Network Support & Infrastructure Engineer based in Leeds, UK." />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Google Fonts: Syne, Plus Jakarta Sans, JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <!-- Fine Grain Film Noise Texture Overlay -->
+    <div class="noise-overlay" aria-hidden="true"></div>
+
+    <!-- Minimalist Growon Loader ("Setting the scene...") -->
+    <div id="loader-overlay" role="status" aria-live="polite">
+      <div class="loader-content">
+        <span class="loader-title">Setting the scene...</span>
+        <div class="loader-bar-bg">
+          <div id="loader-bar-fill" class="loader-bar-fill"></div>
+        </div>
+        <span id="loader-percent" class="loader-counter">0%</span>
+      </div>
+    </div>
+
+    <!-- 3D Three.js Studio Scene Canvas Viewport -->
+    <div id="canvas-container"></div>
+
+    <!-- Floating HUD Overlay -->
+    <header class="hud-layer">
+      <!-- Top Bar -->
+      <div class="hud-top-bar">
+        <!-- Left: Audio Toggle & Tagline -->
+        <div class="hud-left">
+          <button id="audio-toggle" class="audio-toggle-btn" aria-label="Toggle ambient studio audio" title="Toggle Lo-Fi Ambient Audio">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+            </svg>
+            <div id="audio-waves" class="audio-wave-bars">
+              <span class="audio-bar"></span>
+              <span class="audio-bar"></span>
+              <span class="audio-bar"></span>
+            </div>
+          </button>
+
+          <div class="hero-tagline-box">
+            <h1 class="hero-tagline-title">
+              Digital experiences<br />
+              for networks built to last.
+            </h1>
+            <p class="hero-tagline-subtitle">
+              Building resilient infrastructures anchored by one memorable signature scene.
+            </p>
+            <div class="status-pill">
+              <span class="status-indicator-dot"></span>
+              <span>AVAILABLE FOR ONSITE / HYBRID / MULTI-SITE ROLES (UK)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Glassmorphic Nav Menu Box -->
+        <div class="hud-right">
+          <nav id="nav-menu-box" class="nav-menu-box" aria-label="Main Navigation">
+            <button class="nav-link-btn" data-nav-target="about">
+              <span>About</span>
+              <span class="arrow">→</span>
+            </button>
+            <button class="nav-link-btn" data-nav-target="work">
+              <span>Work</span>
+              <span class="arrow">→</span>
+            </button>
+            <button class="nav-link-btn" data-nav-target="experience">
+              <span>Experience</span>
+              <span class="arrow">→</span>
+            </button>
+            <button class="nav-link-btn" data-nav-target="contact">
+              <span>Contact</span>
+              <span class="arrow">→</span>
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Bottom Bar -->
+      <footer class="hud-bottom-bar">
+        <div class="studio-hints">
+          <span id="hover-tooltip" class="hover-item-tooltip">
+            <span>✦</span> Drag to orbit • Click objects in studio to explore
+          </span>
+        </div>
+
+        <div class="hud-copyright">
+          © 2026 Ramees Kallan. All rights reserved. • Leeds, West Yorkshire, UK
+        </div>
+      </footer>
+    </header>
+
+    <!-- ======================================================================
+         MODAL 1: ABOUT ME // EDITORIAL BINDER JOURNAL (Growon Style)
+         ====================================================================== -->
+    <div id="modal-about" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="about-title">
+      <div class="modal-header-nav">
+        <span class="modal-path">ramees.kallan / about</span>
+        <button class="modal-close-btn" aria-label="Close modal">✕</button>
+      </div>
+
+      <div class="notebook-binder-container">
+        <div class="notebook-binder-spread">
+          <!-- Central Spine -->
+          <div class="binder-spine"></div>
+
+          <!-- Left Page: Slate Blue Editorial Page -->
+          <div class="notebook-page-left">
+            <div class="binder-holes">
+              <span class="binder-hole"></span>
+              <span class="binder-hole"></span>
+              <span class="binder-hole"></span>
+              <span class="binder-hole"></span>
+              <span class="binder-hole"></span>
+              <span class="binder-hole"></span>
+            </div>
+
+            <div>
+              <h2 id="about-title" class="left-page-title">
+                Building networks anchored by one memorable signature scene.
+              </h2>
+
+              <div class="left-page-features">
+                <div class="feature-item">
+                  <div class="feature-icon-box">✦</div>
+                  <p class="feature-text">
+                    Ramees is a Network Support and Infrastructure Engineer with hands-on experience configuring, supporting, and troubleshooting network infrastructure across live multi-site environments.
+                  </p>
+                </div>
+
+                <div class="feature-divider"></div>
+
+                <div class="feature-item">
+                  <div class="feature-icon-box">❖</div>
+                  <p class="feature-text">
+                    People rarely remember every patch lead or switch port, but they always remember when a live migration executes with zero unplanned downtime. That's why every project is delivered with disciplined validation.
+                  </p>
+                </div>
+
+                <div class="feature-divider"></div>
+
+                <div class="feature-item">
+                  <div class="feature-icon-box">☁</div>
+                  <p class="feature-text">
+                    MSc Information Technology (Merit) from Leeds Beckett University, active Cisco CCNA preparation, and real-world cutover experience through Cerco Ltd, Agora Solutions, and DXC Technology.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div style="font-family: var(--font-mono); font-size: 11px; opacity: 0.65; letter-spacing: 0.05em;">
+              LEEDS_UK // FULL UK DRIVING LICENCE // RAPID MOBILISATION
+            </div>
+          </div>
+
+          <!-- Right Page: Off-White Dossier with Envelope & FAQ -->
+          <div class="notebook-page-right">
+            <!-- Brass Binder Clip Decor -->
+            <div class="notebook-binder-clip" aria-hidden="true"></div>
+
+            <!-- Black Package Envelope -->
+            <div class="credentials-envelope">
+              <div class="envelope-header">
+                <span class="envelope-title">CREDENTIALS & PROFILE</span>
+                <span class="envelope-meta">05-OCT-2026</span>
+              </div>
+              <div class="envelope-list">
+                <div>● STATUS: CCNA In Progress • Entra ID Certified</div>
+                <div>● LOCATION: Leeds, West Yorkshire (UK Mobile)</div>
+                <div>● SPECIALTY: Managed Switches, Routers, Cutovers, OSPF</div>
+                <div>● DIRECT: ramees.kallan@outlook.com</div>
+              </div>
+            </div>
+
+            <!-- FAQ Paper Dossier -->
+            <div class="faq-dossier-box">
+              <h3 class="faq-title">FAQ</h3>
+              <div id="faq-container" class="faq-accordion">
+                <!-- Injected via JavaScript -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         MODAL 2: WORK & PROJECTS SHOWCASE
+         ====================================================================== -->
+    <div id="modal-work" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="work-title">
+      <div class="modal-header-nav">
+        <span class="modal-path">ramees.kallan / work</span>
+        <button class="modal-close-btn" aria-label="Close modal">✕</button>
+      </div>
+
+      <div class="projects-modal-container">
+        <div class="projects-header-bar">
+          <div>
+            <h2 id="work-title" class="projects-title">Featured Work & Network Labs</h2>
+            <p style="font-size: 0.95rem; color: #94a3b8; margin-top: 4px;">
+              Enterprise migrations, dynamic routing topologies, and monitoring suites.
+            </p>
+          </div>
+
+          <div class="projects-filter-pills">
+            <button class="filter-pill active" data-filter="all">All Projects</button>
+            <button class="filter-pill" data-filter="network">Networking</button>
+            <button class="filter-pill" data-filter="monitoring">Monitoring</button>
+            <button class="filter-pill" data-filter="creative">Creative Web</button>
+          </div>
+        </div>
+
+        <div id="projects-grid" class="projects-grid">
+          <!-- Injected via JavaScript -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         MODAL 3: EXPERIENCE & CERTIFICATIONS
+         ====================================================================== -->
+    <div id="modal-exp" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="exp-title">
+      <div class="modal-header-nav">
+        <span class="modal-path">ramees.kallan / experience</span>
+        <button class="modal-close-btn" aria-label="Close modal">✕</button>
+      </div>
+
+      <div class="projects-modal-container" style="max-height: 820px;">
+        <div class="projects-header-bar">
+          <div>
+            <h2 id="exp-title" class="projects-title">Experience & Certifications</h2>
+            <p style="font-size: 0.95rem; color: #94a3b8; margin-top: 4px;">
+              Enterprise track record across Cerco, Agora Solutions, DXC Technology & Cisco CCNA roadmap.
+            </p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 32px; overflow-y: auto; padding-right: 6px;">
+          <!-- Left Column: Timeline -->
+          <div>
+            <h3 style="font-family: var(--font-display); font-size: 1.15rem; color: var(--accent-cyan); margin-bottom: 16px;">
+              // CAREER TIMELINE
+            </h3>
+            <div id="experience-list" class="experience-timeline">
+              <!-- Injected via JavaScript -->
+            </div>
+          </div>
+
+          <!-- Right Column: Certifications & Education -->
+          <div>
+            <h3 style="font-family: var(--font-display); font-size: 1.15rem; color: var(--accent-cyan); margin-bottom: 16px;">
+              // CERTIFICATIONS & EDUCATION
+            </h3>
+            <div id="certifications-list" style="display: flex; flex-direction: column; gap: 14px;">
+              <!-- Injected via JavaScript -->
+            </div>
+
+            <div style="margin-top: 24px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-glass); border-radius: 8px; padding: 16px;">
+              <h4 style="font-size: 13px; font-weight: 600; color: #ffffff; margin-bottom: 8px;">
+                ACADEMIC QUALIFICATIONS
+              </h4>
+              <p style="font-size: 12px; color: #cbd5e1; line-height: 1.5;">
+                <strong>MSc Information Technology (Merit)</strong><br />
+                Leeds Beckett University, UK (2024)<br /><br />
+                <strong>Bachelor of Computer Applications (First Class)</strong><br />
+                University of Calicut (2022)
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         MODAL 4: CONTACT & GET IN TOUCH
+         ====================================================================== -->
+    <div id="modal-contact" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="contact-title">
+      <div class="modal-header-nav">
+        <span class="modal-path">ramees.kallan / contact</span>
+        <button class="modal-close-btn" aria-label="Close modal">✕</button>
+      </div>
+
+      <div class="projects-modal-container" style="max-width: 960px; max-height: 640px;">
+        <div class="projects-header-bar">
+          <div>
+            <h2 id="contact-title" class="projects-title">Get In Touch</h2>
+            <p style="font-size: 0.95rem; color: #94a3b8; margin-top: 4px;">
+              Available for hybrid, onsite, and multi-site network engineering roles across the UK.
+            </p>
+          </div>
+        </div>
+
+        <div class="contact-grid">
+          <!-- Info Panel -->
+          <div class="contact-info-panel">
+            <div class="contact-quick-links">
+              <div class="contact-item-row">
+                <div class="contact-label-group">
+                  <span>✉</span>
+                  <span>ramees.kallan@outlook.com</span>
+                </div>
+                <button class="copy-btn" data-copy="ramees.kallan@outlook.com">Copy</button>
+              </div>
+
+              <div class="contact-item-row">
+                <div class="contact-label-group">
+                  <span>☎</span>
+                  <span>+44 7799 579462</span>
+                </div>
+                <button class="copy-btn" data-copy="+44 7799 579462">Copy</button>
+              </div>
+
+              <div class="contact-item-row">
+                <div class="contact-label-group">
+                  <span>📍</span>
+                  <span>Leeds, West Yorkshire, UK</span>
+                </div>
+                <span style="font-size: 11px; font-family: var(--font-mono); color: #34d399;">Active</span>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 6px;">
+              <a id="download-cv-btn" href="https://drive.google.com/file/d/1y4BL0VJddRN6wf-KtYk8iis7F6Utju8W/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="download-cv-btn">
+                <span>📄 View / Download CV</span>
+                <span>↗</span>
+              </a>
+
+              <a href="https://www.linkedin.com/in/rameezz/" target="_blank" rel="noopener noreferrer" class="download-cv-btn" style="background: rgba(255,255,255,0.08); box-shadow: none;">
+                <span>LinkedIn</span>
+                <span>↗</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Contact Form -->
+          <form id="contact-form" class="contact-form">
+            <div class="form-field-group">
+              <label for="contact-name" class="form-label">YOUR NAME</label>
+              <input type="text" id="contact-name" class="form-input" placeholder="e.g. Alex Mercer" required />
+            </div>
+
+            <div class="form-field-group">
+              <label for="contact-email" class="form-label">YOUR EMAIL</label>
+              <input type="email" id="contact-email" class="form-input" placeholder="e.g. alex@company.co.uk" required />
+            </div>
+
+            <div class="form-field-group">
+              <label for="contact-msg" class="form-label">MESSAGE</label>
+              <textarea id="contact-msg" class="form-textarea" placeholder="Discuss a network engineering role, project, or cutover requirement..." required></textarea>
+            </div>
+
+            <button type="submit" class="form-submit-btn">Send Message ➔</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification for Copy -->
+    <div id="toast-notification" role="status" aria-live="polite">
+      <span>✔</span>
+      <span id="toast-message">Copied to clipboard</span>
+    </div>
+
+    <!-- Application Script -->
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
