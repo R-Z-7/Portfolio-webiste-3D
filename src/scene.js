@@ -51,8 +51,8 @@ export class StudioScene {
         target: new THREE.Vector3(-0.1, 1.85, 0.05)
       },
       notebook: {
-        pos: new THREE.Vector3(1.15, 2.2, 1.6),
-        target: new THREE.Vector3(0.9, 1.25, 0.5)
+        pos: new THREE.Vector3(1.15, 2.2, 1.8),
+        target: new THREE.Vector3(0.75, 1.25, 0.6)
       },
       rack: {
         pos: new THREE.Vector3(2.4, 2.1, 2.2),
@@ -551,7 +551,7 @@ export class StudioScene {
   buildTurntable() {
     const turntableGroup = new THREE.Group();
     turntableGroup.name = 'turntable';
-    turntableGroup.position.set(-0.88, 1.29, 0.05);
+    turntableGroup.position.set(-1.05, 1.29, 0.18);
 
     // Silver Plinth Base
     const plinthGeo = new THREE.BoxGeometry(0.48, 0.06, 0.42);
@@ -869,8 +869,8 @@ export class StudioScene {
   buildCiscoSwitch() {
     const rackGroup = new THREE.Group();
     rackGroup.name = 'rack';
-    rackGroup.position.set(1.05, 1.29, 0.45);
-    rackGroup.rotation.y = -Math.PI / 12;
+    rackGroup.position.set(1.05, 1.29, 0.62);
+    rackGroup.rotation.y = -Math.PI / 10;
 
     const metalCaseMat = new THREE.MeshStandardMaterial({
       color: 0x1f2937,
@@ -930,8 +930,8 @@ export class StudioScene {
   buildNotebookAndPencil() {
     const noteGroup = new THREE.Group();
     noteGroup.name = 'notebook';
-    noteGroup.position.set(0.68, 1.29, 0.12);
-    noteGroup.rotation.y = 0.15;
+    noteGroup.position.set(0.62, 1.29, 0.30);
+    noteGroup.rotation.y = 0.25;
 
     // Hardcover Black Notebook
     const bookGeo = new THREE.BoxGeometry(0.24, 0.022, 0.34);
@@ -990,7 +990,7 @@ export class StudioScene {
   buildCoffeeMug() {
     const mugGroup = new THREE.Group();
     mugGroup.name = 'mug';
-    mugGroup.position.set(-0.52, 1.29, -0.15);
+    mugGroup.position.set(0.32, 1.29, -0.28);
 
     const mugMat = new THREE.MeshStandardMaterial({
       color: 0xf1f5f9,
